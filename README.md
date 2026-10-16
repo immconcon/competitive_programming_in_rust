@@ -6,7 +6,8 @@ Includes pinned Rust toolchains, platform-specific `Cargo.toml` files and code t
 
 ```sh
 cp ../../template_main.rs ./main.rs
-
+```
+```sh
 cat input.txt | cargo run > output.txt && diff output.txt expected_output.txt
 ```
 
