@@ -106,14 +106,14 @@ impl RangeFenwick {
         self.b2.add(right, -delta * right as i64);
     }
 
-    /// Sum of elements in [0, p).
-    fn prefix_sum(&self, p: usize) -> i64 {
-        p as i64 * self.b1.prefix_sum(p) - self.b2.prefix_sum(p)
+    /// Sum of elements in `0..len`.
+    fn prefix_sum(&self, len: usize) -> i64 {
+        len as i64 * self.b1.prefix_sum(len) - self.b2.prefix_sum(len)
     }
 
-    /// Sum of elements in [l, r).
-    fn range_sum(&self, l: usize, r: usize) -> i64 {
-        self.prefix_sum(r) - self.prefix_sum(l)
+    /// Sum of elements in `left..right`.
+    fn range_sum(&self, left: usize, right: usize) -> i64 {
+        self.prefix_sum(right) - self.prefix_sum(left)
     }
 }
 
@@ -125,42 +125,33 @@ struct FenwickTree {
 impl FenwickTree {
     /// Create a tree of size `n`, all zeros.
     fn new(n: usize) -> Self {
-        FenwickTree {
-            tree: vec![0; n + 1],
-        }
+        FenwickTree { tree: vec![0; n] }
     }
 
     /// Add `delta` to the element at 0-based index `i`.
-    fn add(&mut self, i: usize, delta: i64) {
-        let mut i = i + 1;
-        while i < self.tree.len() {
-            self.tree[i] += delta;
-            i += lowbit(i);
+    fn add(&mut self, idx: usize, delta: i64) {
+        let mut mask = idx;
+        while mask < self.tree.len() {
+            self.tree[mask] += delta;
+            mask |= mask + 1;
         }
     }
 
-    /// Sum of elements in `0..i`
-    fn prefix_sum(&self, mut i: usize) -> i64 {
+    /// Sum of elements in `0..idx`
+    fn prefix_sum(&self, idx: usize) -> i64 {
+        let mut mask = idx;
         let mut sum = 0;
-        while i > 0 {
-            sum += self.tree[i];
-            i -= lowbit(i);
+        while mask > 0 {
+            sum += self.tree[mask - 1];
+            mask &= mask - 1;
         }
         sum
     }
 
-    /// Sum of elements in `l..r`
-    fn range_sum(&self, l: usize, r: usize) -> i64 {
-        self.prefix_sum(r) - self.prefix_sum(l)
+    /// Sum of elements in `left..right`
+    fn range_sum(&self, left: usize, right: usize) -> i64 {
+        self.prefix_sum(right) - self.prefix_sum(left)
     }
-}
-
-/// Computes the lowest set bit in the `i`.
-///
-/// Equivalent to `1 << i.trailing_zeros()` or with 1.97+ rust `i.isolate_lowest_one()`.
-fn lowbit(i: usize) -> usize {
-    // i & -i
-    i & i.wrapping_neg()
 }
 
 struct DiffArray(Vec<i64>);
@@ -170,28 +161,27 @@ impl DiffArray {
         Self(vec![0; n + 1])
     }
 
-    /// Add `delta` to the `[left..right]` range.
-    fn add(&mut self, left: usize, right: usize, delta: i64) {
-        self.0[left] += delta;
-        self.0[right] -= delta;
+    /// Add `val` to every element in the inclusive range `[left..=right]`.
+    fn range_add(&mut self, left: usize, right: usize, val: i64) {
+        assert!(
+            left <= right && right + 1 < self.0.len(),
+            "range out of bounds"
+        );
+        self.0[left] += val;
+        self.0[right + 1] -= val;
     }
 
-    /// Add `val` to every element in the inclusive range [l, r]. O(1).
-    pub fn range_add(&mut self, l: usize, r: usize, val: i64) {
-        assert!(l <= r && r + 1 < self.0.len(), "range out of bounds");
-        self.0[l] += val;
-        self.0[r + 1] -= val;
-    }
-
-    /// Reconstruct the final array via prefix sums. O(n).
-    pub fn build(&self) -> Vec<i64> {
+    /// Build the final array.
+    fn build(self) -> Vec<i64> {
+        let mut vec = self.0;
+        let n = vec.len() - 1;
         let mut sum = 0;
-        self.0[..self.0.len() - 1]
-            .iter()
-            .map(|&diff| {
-                sum += diff;
-                sum
-            })
-            .collect()
+        vec[..n].iter_mut().for_each(|diff| {
+            sum += *diff;
+            *diff = sum;
+        });
+        vec.truncate(n);
+
+        vec
     }
 }
