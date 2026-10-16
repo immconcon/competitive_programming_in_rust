@@ -12,18 +12,21 @@ fn codeforces_main() {
     let mut lines = file.lines();
 
     macro_rules! read_line {
-        ( $($ty_:ty),+ $(,)?) => {{
-            let line = lines.next().unwrap();
-            let mut bla = line.split_ascii_whitespace();
-            ($(
-                bla.next().unwrap().parse::<$ty_>().unwrap()
-            ),+)
+        (str) => {{
+            lines.next().unwrap()
         }};
         ( Vec < $ty_:ty > capacity($cap:expr) ) => {{
             let line = lines.next().unwrap();
             let mut vec: Vec<$ty_> = Vec::with_capacity($cap);
             vec.extend(line.split_ascii_whitespace().map(|x| x.parse::<$ty_>().unwrap()));
             vec
+        }};
+        ( $($ty_:ty),+ $(,)?) => {{
+            let line = lines.next().unwrap();
+            let mut bla = line.split_ascii_whitespace();
+            ($(
+                bla.next().unwrap().parse::<$ty_>().unwrap()
+            ),+)
         }};
     }
 
@@ -50,12 +53,8 @@ fn atcoder_main() {
     let mut lines = file.lines();
 
     macro_rules! read_line {
-        ( $($ty_:ty),+ $(,)?) => {{
-            let line = lines.next().unwrap();
-            let mut bla = line.split_ascii_whitespace();
-            ($(
-                bla.next().unwrap().parse::<$ty_>().unwrap()
-            ),+)
+        (str) => {{
+            lines.next().unwrap()
         }};
         ( Vec < $ty_:ty > capacity($cap:expr) ) => {{
             let line = lines.next().unwrap();
@@ -63,8 +62,12 @@ fn atcoder_main() {
             vec.extend(line.split_ascii_whitespace().map(|x| x.parse::<$ty_>().unwrap()));
             vec
         }};
-        (str) => {{
-            lines.next().unwrap();
+        ( $($ty_:ty),+ $(,)?) => {{
+            let line = lines.next().unwrap();
+            let mut bla = line.split_ascii_whitespace();
+            ($(
+                bla.next().unwrap().parse::<$ty_>().unwrap()
+            ),+)
         }};
     }
 
