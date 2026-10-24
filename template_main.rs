@@ -1,11 +1,11 @@
 #![allow(dead_code)]
 
-use std::{collections::HashMap, io::BufRead};
+use std::io::BufRead;
 
 fn main() {
     //codeforces_main();
     //atcoder_main();
-    atcoder_interactive_main();
+    interactive_main();
 }
 
 fn codeforces_main() {
@@ -87,7 +87,11 @@ fn atcoder_main() {
     std::io::Write::write(&mut std::io::stdout(), buf.as_bytes()).unwrap();
 }
 
-fn atcoder_interactive_main() {
+// I guess atcoder and codeforces interactive problems are close enough
+// that there's no need in splitting them into two different templates.
+// anyway, now template is for this:
+// https://codeforces.com/gym/101021/problem/1
+fn interactive_main() {
     use std::io::Write;
 
     let stdin_lock = &mut std::io::stdin().lock();
@@ -123,19 +127,19 @@ fn atcoder_interactive_main() {
         }};
     }
 
-    let (n, _q) = read_line!(u8, usize);
-    let unsorted: Vec<u8> = (0..n).map(|diff| b'A' + diff).collect();
-    let mut less =
-        |probe: u8, seek: u8| match query!("? {} {}", char::from(probe), char::from(seek)) {
-            "<" => true,
-            _ => false,
-        };
+    let mut target_is_less_than = |guess| query!("{}", guess) == "<";
+    let mut left = 1;
+    let mut right = 1_000_000;
+    while left < right {
+        let mid = (left + right + 1) / 2;
+        if target_is_less_than(mid) {
+            right = mid - 1;
+        } else {
+            left = mid;
+        }
+    }
 
-    let res = fja_sort(&unsorted, &mut less);
-
-    let s = String::from_utf8(res).unwrap();
-
-    writeln!(stdout_lock, "! {s}").unwrap();
+    writeln!(stdout_lock, "! {left}").unwrap();
     stdout_lock.flush().unwrap();
 }
 
