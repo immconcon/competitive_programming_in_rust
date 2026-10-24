@@ -105,10 +105,23 @@ impl DiffArray {
     }
 }
 
-/// This is bullshit and why is it even a thing in practice problems for `atcoder`.
+// This is bullshit and why is it even a thing in practice problems for `atcoder`.
+// I just wanted to test API... Anyway
+/// A naive merge-insertion sort (Ford-Johnson algorithm) for interactive atcoder practice.
 ///
-/// I just wanted to test API...
-fn fja_sort(xs: &[u8], less: &mut impl FnMut(u8, u8) -> bool) -> Vec<u8> {
+/// It optimizes heavily for the number of comparisons and pretty much nothing else.
+///
+/// Don't use unless your comparison times are stupid, like `O(n^2)` or something.
+/// And even then don't use, because there are better algorithms,
+/// like 1979 Glenn Manacher algorithm.
+/// Or just optimize your comparisons to not use a stupid amount of time or something.
+///
+/// So yeah, outside of theoretical grounds this is a pretty useless algorithm.
+///
+/// ## Correctness
+///
+/// Current implementation is not correct if `xs` has duplicate values. So again, don't use.
+fn ford_johnson_sort(xs: &[u8], less: &mut impl FnMut(u8, u8) -> bool) -> Vec<u8> {
     let n = xs.len();
     if n < 2 {
         return xs.to_vec();
@@ -124,7 +137,7 @@ fn fja_sort(xs: &[u8], less: &mut impl FnMut(u8, u8) -> bool) -> Vec<u8> {
         partner.insert(hi, lo);
         high_values.push(hi);
     }
-    let winners = fja_sort(&high_values, less); // sort the larger elements recursively
+    let winners = ford_johnson_sort(&high_values, less); // sort the larger elements recursively
 
     // chain = b1, a1, a2, ...; bs[i] = (b_{i+1}, its winner a_{i+1})
     let mut chain: Vec<u8> = partner
