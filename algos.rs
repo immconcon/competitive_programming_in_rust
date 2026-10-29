@@ -37,7 +37,7 @@ impl RangeFenwick {
 }
 
 struct FenwickTree {
-    // 1-indexed
+    // 0-indexed
     tree: Vec<i64>,
 }
 
