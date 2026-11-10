@@ -185,3 +185,81 @@ fn ford_johnson_sort(xs: &[u8], less: &mut impl FnMut(u8, u8) -> bool) -> Vec<u8
     }
     chain
 }
+
+struct BitSetTree<const L: usize> {
+    bit_chunks: Vec<u64>,
+    offsets: [usize; L],
+    sizes: [usize; L],
+    len: usize,
+}
+
+impl<const L: usize> BitSetTree<L> {
+    fn new(k: usize) -> Self {
+        let mut offsets = [0; L];
+        let mut sizes = [0; L];
+        let mut total = 0;
+        let mut x = k;
+        offsets
+            .iter_mut()
+            .zip(sizes.iter_mut())
+            .for_each(|(offset, size)| {
+                x = x.div_ceil(64);
+                *offset = total;
+                *size = x;
+                total += x;
+            });
+
+        Self {
+            bit_chunks: vec![0_u64; total],
+            offsets,
+            sizes,
+            len: 0,
+        }
+    }
+    fn is_empty(&self) -> bool {
+        self.len == 0
+    }
+    fn add(&mut self, mut v: usize) {
+        let present = (self.bit_chunks[v / 64] >> (v % 64)) & 1;
+        self.len += (present ^ 1) as usize;
+        self.offsets.iter().for_each(|offset| {
+            let wi = v / 64;
+            self.bit_chunks[offset + wi] |= 1_u64 << (v % 64);
+            v = wi;
+        });
+    }
+    fn remove(&mut self, mut v: usize) {
+        let present = self.bit_chunks[v / 64] >> (v % 64) & 1;
+        self.len -= present as usize;
+        let mut prev_empty = true;
+        self.offsets.iter().for_each(|offset| {
+            let wi = v / 64;
+            let w = &mut self.bit_chunks[offset + wi];
+            *w &= ((prev_empty as u64) << (v % 64)).not();
+            prev_empty = *w == 0;
+            v = wi;
+        });
+    }
+    /// Smallest set element >= i, or None.
+    fn next(&self, mut i: usize) -> Option<usize> {
+        if self.is_empty() {
+            return None;
+        }
+        for h in 0..L {
+            let wi = i / 64;
+            if wi >= self.sizes[h] {
+                return None;
+            }
+            let w = self.bit_chunks[self.offsets[h] + wi] >> (i % 64);
+            if w != 0 {
+                i += w.trailing_zeros() as usize;
+                for g in (0..h).rev() {
+                    i = (i * 64) | self.bit_chunks[self.offsets[g] + i].trailing_zeros() as usize;
+                }
+                return Some(i);
+            }
+            i = wi + 1;
+        }
+        None
+    }
+}
