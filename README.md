@@ -11,6 +11,15 @@ cp ../../template_main.rs ./main.rs
 cat input.txt | cargo run > output.txt && diff output.txt expected_output.txt
 ```
 
+Speeding up the copypaste of testcases. I'm on wayland, hence wl-paste.
+You can also use neovim/emacs script, or basically anything you fancy.
+There's also `online-judge-tools` thingy, and I'm probably gonna be using it soon,
+but this is good enough for now.
+```sh
+wl-paste > input.txt
+wl-paste > expected_output.txt
+```
+
 You can probably directly invoke rustc, but I'm too lazy to do that.
 
 ## Leetcode
