@@ -166,5 +166,3 @@ fn read_query_answer<'a>(buf: &'a mut String, stdin: &mut std::io::StdinLock) ->
     stdin.read_line(buf).unwrap();
     buf
 }
-
-const MOD: i64 = 1_000_000_000 + 7;
